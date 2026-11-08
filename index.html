@@ -2,86 +2,87 @@
 <html lang="zh-Hant-HK">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="食藥提示">
-<meta name="theme-color" content="#5F7F9A">
+<meta name="theme-color" content="#f5d98f">
 <link rel="apple-touch-icon" href="icon.png">
 <title>💊 食藥提示</title>
 <style>
 :root{
-  --bg:#F6F4EF;
-  --header:#5F7F9A;
-  --text:#3A3F47;
-  --text2:#7A8089;
-  --card:#FFFFFF;
-  --shadow:0 2px 8px rgba(0,0,0,.06);
-  --accent:#8FB0CC;
-  --accent-text:#4E6E8A;
-  --green:#7DB58A;
-  --grey-btn:#DAD7D0;
-  --grey-btn-text:#8A8F96;
-  --danger:#D48C8C;
-  --orange:#E0AE78;
-  --cancel:#E4E1DA;
-  --cancel-text:#5B6066;
-  --alarm1:#C97A7A;
-  --alarm2:#D99090;
-  --tag-empty-bg:#FAEBDC; --tag-empty-fg:#8B5A2B; --tag-empty-bd:#E9C9A4;
-  --tag-full-bg:#E4F0E5;  --tag-full-fg:#3E6B49;  --tag-full-bd:#B6D6BC;
-  --tag-meal-bg:#E3ECF5;  --tag-meal-fg:#36587A;  --tag-meal-bd:#B8CFE3;
+  --bg:#fdf6ec;
+  --card:#fdf8ee;
+  --text:#3a2b1a;
+  --text2:#8a6d3b;
+  --gold1:#f5d98f;
+  --gold2:#eec870;
+  --gold-line:#e0b24d;
+  --cream:#f3e5c3;
+  --cream2:#ffe9a6;
+  --brown:#a65d2e;
+  --orange:#d9480f;
+  --orange2:#e8590c;
+  --green:#2b8a3e;
+  --green2:#69db7c;
+  --red:#c92a2a;
+  --shadow:0 2px 6px rgba(0,0,0,.10);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{
-  font-family:-apple-system,"PingFang HK","Noto Sans HK","Microsoft JhengHei",sans-serif;
+  font-family:-apple-system,"PingFang HK","PingFang TC","Noto Sans HK","Microsoft JhengHei",sans-serif;
   background:var(--bg);color:var(--text);font-size:20px;line-height:1.4;
   padding-bottom:calc(env(safe-area-inset-bottom) + 30px);
 }
 header{
-  background:var(--header);color:#fff;text-align:center;
-  padding:calc(env(safe-area-inset-top) + 18px) 20px 18px;
+  background:linear-gradient(180deg,var(--gold1),var(--gold2));
+  color:var(--text);text-align:center;
+  padding:calc(env(safe-area-inset-top) + 16px) 20px 14px;
+  box-shadow:0 3px 6px rgba(0,0,0,.15);
+  position:sticky;top:0;z-index:5;
 }
-header h1{margin:0;font-size:30px;font-weight:700}
-header .now{margin-top:6px;font-size:19px;opacity:.95}
+header h1{margin:0;font-size:28px;font-weight:800}
+header h1 span{color:var(--orange)}
+header .now{margin-top:6px;font-size:18px;font-weight:700;color:var(--text2)}
 
-main{padding:16px}
+main{padding:14px}
 
 .card{
-  background:var(--card);border-radius:18px;padding:18px;margin-bottom:14px;
+  background:var(--card);border-radius:16px;padding:16px;margin-bottom:12px;
   box-shadow:var(--shadow);border:3px solid transparent;
 }
-.card.next{border-color:var(--accent)}
-.card.done{background:#EFEDE7;opacity:.85}
-.nextlabel{color:var(--accent-text);font-size:18px;font-weight:700;margin-bottom:4px}
-.time{font-size:34px;font-weight:700;letter-spacing:.5px}
+.card.next{border-color:var(--orange);background:#fff8e8}
+.card.done{background:var(--cream);opacity:.85;box-shadow:none}
+.nextlabel{color:var(--orange);font-size:18px;font-weight:800;margin-bottom:4px}
+.time{font-size:34px;font-weight:800;letter-spacing:.5px}
 .card.done .time{font-size:26px;color:var(--text2)}
 .row{display:flex;align-items:center;gap:10px;margin:8px 0 14px;flex-wrap:wrap}
-.name{font-size:26px;font-weight:600}
+.name{font-size:26px;font-weight:700}
 .card.done .name{text-decoration:line-through;color:var(--text2)}
 
 .tag{
   display:inline-block;padding:4px 12px;border-radius:999px;
-  font-size:18px;font-weight:700;border:2px solid;
+  font-size:18px;font-weight:800;border:2px solid;
 }
-.tag.empty{background:var(--tag-empty-bg);color:var(--tag-empty-fg);border-color:var(--tag-empty-bd)}
-.tag.full {background:var(--tag-full-bg); color:var(--tag-full-fg); border-color:var(--tag-full-bd)}
-.tag.meal {background:var(--tag-meal-bg); color:var(--tag-meal-fg); border-color:var(--tag-meal-bd)}
+.tag.empty{background:var(--cream2);color:var(--text2);border-color:var(--gold-line)}
+.tag.full {background:#d3f9d8;color:var(--green);border-color:var(--green2)}
+.tag.meal {background:#ffe8cc;color:var(--orange);border-color:#ffa94d}
 
 .btn{
   display:block;width:100%;border:none;border-radius:16px;
-  padding:18px;font-size:24px;font-weight:700;cursor:pointer;
+  padding:18px;font-size:24px;font-weight:800;cursor:pointer;
   font-family:inherit;color:#fff;
+  box-shadow:0 2px 4px rgba(0,0,0,.12);
 }
-.btn:active{transform:scale(.98);filter:brightness(.95)}
+.btn:active{transform:scale(.97)}
 .btn.green{background:var(--green)}
-.btn.grey{background:var(--grey-btn);color:var(--grey-btn-text);font-size:20px}
-.btn.outline{background:#fff;color:var(--accent-text);border:3px solid var(--accent)}
-.btn.accent{background:var(--accent)}
+.btn.grey{background:var(--cream);color:var(--text2);font-size:20px;box-shadow:none}
+.btn.outline{background:var(--card);color:var(--brown);border:3px solid var(--brown);box-shadow:none}
+.btn.accent{background:var(--brown)}
 .btn.orange{background:var(--orange)}
-.btn.danger{background:var(--danger)}
-.btn.cancel{background:var(--cancel);color:var(--cancel-text)}
+.btn.danger{background:var(--red)}
+.btn.cancel{background:var(--cream);color:var(--text2);box-shadow:none}
 
 .editrow{display:flex;gap:10px;margin-top:12px}
 .editrow .btn{font-size:20px;padding:14px}
@@ -92,28 +93,29 @@ main{padding:16px}
 
 /* 底部表單 */
 .sheetbg{
-  display:none;position:fixed;inset:0;background:rgba(58,63,71,.45);z-index:50;
+  display:none;position:fixed;inset:0;background:rgba(58,43,26,.5);z-index:50;
 }
 .sheetbg.show{display:flex;align-items:flex-end}
 .sheet{
   background:var(--bg);width:100%;border-radius:24px 24px 0 0;
   padding:22px 20px calc(env(safe-area-inset-bottom) + 22px);
+  border-top:3px solid var(--gold-line);
 }
-.sheet h2{margin:0 0 16px;font-size:26px}
-.sheet label{display:block;font-size:19px;font-weight:700;margin:14px 0 6px;color:var(--text)}
+.sheet h2{margin:0 0 16px;font-size:26px;font-weight:800}
+.sheet label{display:block;font-size:19px;font-weight:700;margin:14px 0 6px;color:var(--text2)}
 .sheet input{
   width:100%;font-size:26px;padding:14px;border-radius:14px;
-  border:2px solid #D6D3CC;background:#fff;color:var(--text);font-family:inherit;
+  border:2px solid var(--gold-line);background:#fff;color:var(--text);font-family:inherit;
 }
-.sheet input:focus{outline:none;border-color:var(--accent)}
+.sheet input:focus{outline:none;border-color:var(--orange)}
 .kinds{display:flex;gap:10px}
 .kinds button{
-  flex:1;padding:14px 4px;border-radius:14px;font-size:20px;font-weight:700;
-  border:2px solid #D6D3CC;background:#fff;color:var(--text2);font-family:inherit;
+  flex:1;padding:14px 4px;border-radius:14px;font-size:20px;font-weight:800;
+  border:2px solid var(--gold-line);background:#fff;color:var(--text2);font-family:inherit;
 }
-.kinds button.sel.empty{background:var(--tag-empty-bg);color:var(--tag-empty-fg);border-color:var(--tag-empty-bd)}
-.kinds button.sel.full {background:var(--tag-full-bg); color:var(--tag-full-fg); border-color:var(--tag-full-bd)}
-.kinds button.sel.meal {background:var(--tag-meal-bg); color:var(--tag-meal-fg); border-color:var(--tag-meal-bd)}
+.kinds button.sel.empty{background:var(--cream2);color:var(--text2);border-color:var(--brown)}
+.kinds button.sel.full {background:#d3f9d8;color:var(--green);border-color:var(--green)}
+.kinds button.sel.meal {background:#ffe8cc;color:var(--orange);border-color:var(--orange)}
 .sheet .actions{display:flex;gap:12px;margin-top:22px}
 .sheet .actions .btn{font-size:22px}
 
@@ -125,23 +127,23 @@ main{padding:16px}
   animation:flash 1.2s infinite;
 }
 #alarm.show{display:flex}
-@keyframes flash{0%,100%{background:var(--alarm1)}50%{background:var(--alarm2)}}
+@keyframes flash{0%,100%{background:var(--orange)}50%{background:var(--orange2)}}
 .bell{font-size:90px;animation:shake .6s infinite}
 @keyframes shake{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}
-#alarm h2{font-size:44px;margin:10px 0 24px}
+#alarm h2{font-size:44px;margin:10px 0 24px;font-weight:800}
 .alarmlist{width:100%;max-width:420px}
 .alarmitem{
-  background:#fff;color:var(--text);border-radius:16px;padding:14px 16px;margin-bottom:10px;
-  display:flex;align-items:center;gap:10px;font-size:26px;font-weight:600;text-align:left;
+  background:var(--card);color:var(--text);border-radius:16px;padding:14px 16px;margin-bottom:10px;
+  display:flex;align-items:center;gap:10px;font-size:26px;font-weight:700;text-align:left;
 }
 #alarm .btn.green{max-width:420px;padding:26px;font-size:32px;margin-top:20px}
-#alarm .btn.snooze{max-width:420px;margin-top:14px;background:rgba(255,255,255,.25);color:#fff;font-size:22px}
+#alarm .btn.snooze{max-width:420px;margin-top:14px;background:rgba(255,255,255,.25);color:#fff;font-size:22px;box-shadow:none}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>💊 食藥提示</h1>
+  <h1><span>💊</span> 食藥提示</h1>
   <div class="now" id="now">—</div>
 </header>
 
@@ -154,7 +156,7 @@ main{padding:16px}
     <button class="btn orange" id="alarmBtn" onclick="toggleAlarm()">🔔 開啟響鬧</button>
     <div class="hint">⚠️ 響鬧要 App 開住喺畫面先會響，鎖機就唔會。想鎖機都有提示，請用下面「匯出到日曆」。</div>
     <button class="btn outline" onclick="exportICS()">📅 匯出到 iPhone 日曆（鎖機都會提）</button>
-    <div class="hint">撳完會下載一個檔案，開佔它 → 揀「全部加入」，日曆就會每日準時提你。</div>
+    <div class="hint">撳完會下載一個檔案，開啟它 → 揀「全部加入」，日曆就會每日準時提你。</div>
   </div>
 </main>
 
