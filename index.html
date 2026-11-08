@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="食藥提示">
+<meta name="theme-color" content="#1e3a8a">
+<link rel="apple-touch-icon" href="icon.png">
+<title>💊 食藥提示</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; background: #f2f4f8; color: #111;
+    font-family: -apple-system, "PingFang HK", "Noto Sans TC", sans-serif;
+    font-size: 22px; line-height: 1.4;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  header {
+    background: #1e3a8a; color: #fff; text-align: center;
+    padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+    position: sticky; top: 0; z-index: 5;
+  }
+  header h1 { margin: 0; font-size: 26px; }
+  #clock { font-size: 20px; opacity: .9; margin-top: 4px; }
+  main { padding: 16px; max-width: 560px; margin: 0 auto; }
+
+  .card {
+    background: #fff; border-radius: 20px; padding: 16px;
+    margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    border: 4px solid transparent;
+  }
+  .card.next { border-color: #2563eb; }
+  .card.taken { background: #e9ecef; }
+  .card.taken .name { text-decoration: line-through; color: #777; }
+  .nextTag { color: #2563eb; font-weight: 800; font-size: 18px; margin-bottom: 4px; }
+  .time { font-size: 34px; font-weight: 800; }
+  .row2 { display: flex; align-items: center; gap: 12px; margin: 8px 0 12px; flex-wrap: wrap; }
+  .badge {
+    font-size: 24px; font-weight: 800; padding: 6px 16px; border-radius: 14px; border: 3px solid;
+  }
+  .badge.empty { background: #fff3e0; color: #9a3412; border-color: #f59e0b; }
+  .badge.full  { background: #e8f5e9; color: #14532d; border-color: #16a34a; }
+  .badge.meal  { background: #e0f2fe; color: #0c4a6e; border-color: #0284c7; }
+  .name { font-size: 30px; font-weight: 700; }
+
+  .btn {
+    display: block; width: 100%; border: 0; border-radius: 16px;
+    font-size: 24px; font-weight: 800; padding: 16px; min-height: 64px;
+    color: #fff; cursor: pointer;
+  }
+  .btn.green { background: #16a34a; }
+  .btn.gray  { background: #6b7280; }
+  .btn.blue  { background: #2563eb; }
+  .btn.red   { background: #dc2626; }
+  .btn.orange{ background: #ea580c; }
+  .btn.white { background: #fff; color: #1e3a8a; border: 3px solid #1e3a8a; }
+  .btn.big { font-size: 30px; min-height: 80px; }
+  .btn + .btn { margin-top: 12px; }
+  .editRow { display: flex; gap: 10px; margin-top: 12px; }
+  .editRow .btn { font-size: 20px; min-height: 56px; }
+
+  .tools { margin-top: 24px; }
+  .hint { font-size: 17px; color: #555; margin: 10px 4px 0; }
+  .ok { color: #15803d; font-weight: 700; }
+
+  .hidden { display: none !important; }
+
+  /* 修改表單 */
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: flex; align-items: flex-end; z-index: 20;
+  }
+  .sheet {
+    background: #fff; width: 100%; border-radius: 24px 24px 0 0;
+    padding: 20px 20px calc(24px + env(safe-area-inset-bottom));
+  }
+  .sheet h2 { margin: 0 0 12px; font-size: 26px; }
+  .sheet label { display: block; font-weight: 700; margin: 14px 0 6px; }
+  .sheet input {
+    width: 100%; font-size: 28px; padding: 12px; border-radius: 14px;
+    border: 3px solid #cbd5e1; font-family: inherit;
+  }
+  .typeRow { display: flex; gap: 10px; }
+  .typeBtn {
+    flex: 1; font-size: 24px; font-weight: 800; padding: 16px 0;
+    border-radius: 14px; border: 3px solid #cbd5e1; background: #fff; color: #333;
+  }
+  .typeBtn.sel.empty { background: #fff3e0; color: #9a3412; border-color: #f59e0b; }
+  .typeBtn.sel.full  { background: #e8f5e9; color: #14532d; border-color: #16a34a; }
+  .typeBtn.sel.meal  { background: #e0f2fe; color: #0c4a6e; border-color: #0284c7; }
+  .row { display: flex; gap: 12px; margin-top: 22px; }
+  .row .btn + .btn { margin-top: 0; }
+
+  /* 響鬧全螢幕 */
+  .overlay {
+    position: fixed; inset: 0; background: #dc2626; color: #fff; z-index: 30;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 24px; animation: flash 1s infinite;
+  }
+  @keyframes flash { 50% { background: #991b1b; } }
+  .overlay .bell { font-size: 90px; animation: ring .6s infinite; }
+  @keyframes ring { 0%,100%{transform:rotate(-15deg)} 50%{transform:rotate(15deg)} }
+  .overlay h1 { font-size: 44px; margin: 8px 0 16px; }
+  .alarmItem {
+    background: #fff; color: #111; border-radius: 18px; padding: 14px 20px;
+    font-size: 30px; font-weight: 800; margin: 8px 0; width: 100%; max-width: 480px;
+  }
+  .overlay .btn { max-width: 480px; margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💊 食藥提示</h1>
+  <div id="clock">--:--</div>
+</header>
+
+<main>
+  <div id="list"></div>
+
+  <button id="addBtn" class="btn blue hidden">➕ 加一行藥</button>
+
+  <div class="tools">
+    <button id="editBtn" class="btn white">✏️ 修改藥單</button>
+    <button id="soundBtn" class="btn orange">🔔 開啟響鬧</button>
+    <div id="soundHint" class="hint">⚠️ 響鬧要 App 開住喺畫面先會響。建議充電時放喺枱面開住。</div>
+    <button id="icsBtn" class="btn white">📅 匯出到 iPhone 日曆（鎖機都會提）</button>
+    <div class="hint">撳完會下載一個檔案，打開佔 → 「加入全部」，之後每日日曆會自動通知。</div>
+  </div>
+</main>
+
+<!-- 修改 / 新增 -->
+<div id="modal" class="modal hidden">
+  <div class="sheet">
+    <h2 id="modalTitle">加一行藥</h2>
+    <label>⏰ 時間</label>
+    <input type="time" id="fTime">
+    <label>💊 藥名</label>
+    <input type="text" id="fName" placeholder="例如：胃藥">
+    <label>🍚 幾時食</label>
+    <div class="typeRow">
+      <button type="button" class="typeBtn empty" data-type="empty">空肚</button>
+      <button type="button" class="typeBtn full"  data-type="full">飽肚</button>
+      <button type="button" class="typeBtn meal"  data-type="meal">食飯</button>
+    </div>
+    <div class="row">
+      <button id="fCancel" class="btn gray">取消</button>
+      <button id="fSave" class="btn green">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 響鬧 -->
+<div id="alarm" class="overlay hidden">
+  <div class="bell">🔔</div>
+  <h1>夠鐘食藥！</h1>
+  <div id="alarmList"></div>
+  <button id="alarmDone" class="btn green big">✅ 食咗</button>
+  <button id="alarmSnooze" class="btn gray">⏰ 10 分鐘後再提</button>
+</div>
+
+<script>
+/* ---------- 資料 ---------- */
+const KEY = 'medReminder_v1';
+const TYPES = { empty: '空肚', full: '飽肚', meal: '食飯' };
+const DEFAULT_ITEMS = [
+  { time: '07:00', name: '尿酸藥', type: 'empty' },
+  { time: '09:00', name: '胃藥',   type: 'empty' },
+  { time: '10:00', name: '食早餐', type: 'meal'  },
+  { time: '10:00', name: '星星藥', type: 'full'  },
+  { time: '15:00', name: '胃藥',   type: 'empty' },
+  { time: '16:00', name: '星星藥', type: 'full'  },
+];
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
+let state = load();
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && Array.isArray(s.items)) return s;
+  } catch (e) {}
+  return { items: DEFAULT_ITEMS.map(i => ({ ...i, id: uid() })), taken: {}, takenDate: todayStr(), soundOn: false };
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+function resetIfNewDay() {
+  if (state.takenDate !== todayStr()) {
+    state.taken = {}; state.takenDate = todayStr(); alarmed = {}; snooze = {}; save();
+  }
+}
+
+/* ---------- 顯示 ---------- */
+let editMode = false;
+const $ = id => document.getElementById(id);
+
+function fmtTime(t) {
+  const [h, m] = t.split(':').map(Number);
+  const p = h < 5 ? '凌晨' : h < 11 ? '早上' : h < 13 ? '中午' : h < 18 ? '下午' : '晚上';
+  const h12 = (h % 12) || 12;
+  return `${p} ${h12}:${String(m).padStart(2, '0')}`;
+}
+function nowHM() { const d = new Date(); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); }
+function sorted() { return [...state.items].sort((a, b) => a.time.localeCompare(b.time)); }
+
+function render() {
+  resetIfNewDay();
+  const items = sorted();
+  const now = nowHM();
+  const nextTime = (items.find(i => !state.taken[i.id] && i.time >= now) || {}).time;
+  $('list').innerHTML = items.map(i => {
+    const taken = !!state.taken[i.id];
+    const isNext = !taken && i.time === nextTime;
+    return `
+      <div class="card ${taken ? 'taken' : ''} ${isNext ? 'next' : ''}">
+        ${isNext ? '<div class="nextTag">⏰ 下一次</div>' : ''}
+        <div class="time">${fmtTime(i.time)}</div>
+        <div class="row2">
+          <span class="badge ${i.type}">${TYPES[i.type]}</span>
+          <span class="name">${esc(i.name)}</span>
+        </div>
+        <button class="btn ${taken ? 'gray' : 'green'}" onclick="toggleTaken('${i.id}')">
+          ${taken ? '✅ 已經食咗（撳一下取消）' : '✅ 食咗'}
+        </button>
+        ${editMode ? `
+        <div class="editRow">
+          <button class="btn blue" onclick="openForm('${i.id}')">✏️ 改</button>
+          <button class="btn red" onclick="removeItem('${i.id}')">🗑 刪除</button>
+        </div>` : ''}
+      </div>`;
+  }).join('');
+  $('addBtn').classList.toggle('hidden', !editMode);
+  $('editBtn').textContent = editMode ? '✔️ 完成修改' : '✏️ 修改藥單';
+  $('editBtn').className = 'btn ' + (editMode ? 'blue' : 'white');
+}
+function esc(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function toggleTaken(id) { state.taken[id] = !state.taken[id]; save(); render(); }
+function removeItem(id) {
+  const it = state.items.find(i => i.id === id);
+  if (confirm(`真係要刪除「${it.name}」？`)) {
+    state.items = state.items.filter(i => i.id !== id); save(); render();
+  }
+}
+
+/* ---------- 新增 / 修改表單 ---------- */
+let editingId = null, fType = 'empty';
+function openForm(id) {
+  editingId = id || null;
+  const it = id ? state.items.find(i => i.id === id) : { time: '08:00', name: '', type: 'empty' };
+  $('modalTitle').textContent = id ? '修改' : '加一行藥';
+  $('fTime').value = it.time; $('fName').value = it.name; setType(it.type);
+  $('modal').classList.remove('hidden');
+}
+function setType(t) {
+  fType = t;
+  document.querySelectorAll('.typeBtn').forEach(b => b.classList.toggle('sel', b.dataset.type === t));
+}
+document.querySelectorAll('.typeBtn').forEach(b => b.onclick = () => setType(b.dataset.type));
+$('fCancel').onclick = () => $('modal').classList.add('hidden');
+$('fSave').onclick = () => {
+  const time = $('fTime').value, name = $('fName').value.trim();
+  if (!time) return alert('請揀時間');
+  if (!name) return alert('請打藥名');
+  if (editingId) {
+    const it = state.items.find(i => i.id === editingId);
+    Object.assign(it, { time, name, type: fType });
+  } else {
+    state.items.push({ id: uid(), time, name, type: fType });
+  }
+  save(); render(); $('modal').classList.add('hidden');
+};
+$('addBtn').onclick = () => openForm(null);
+$('editBtn').onclick = () => { editMode = !editMode; render(); };
+
+/* ---------- 響鬧 ---------- */
+let ctx = null, alarmed = {}, snooze = {}, ringTimer = null, wakeLock = null;
+
+async function enableSound() {
+  try {
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    await ctx.resume();
+    beep(880, .15);                      // 試一聲
+    state.soundOn = true; save();
+    try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
+    updateSoundUI();
+  } catch (e) { alert('開唔到聲音：' + e.message); }
+}
+function updateSoundUI() {
+  const on = state.soundOn && ctx;
+  $('soundBtn').textContent = on ? '🔔 響鬧已開（撳一下測試）' : '🔔 開啟響鬧';
+  $('soundBtn').className = 'btn ' + (on ? 'green' : 'orange');
+  $('soundHint').innerHTML = on
+    ? '<span class="ok">✅ 已開啟。</span>請保持 App 開住喺畫面，到時間會響。'
+    : '⚠️ 響鬧要 App 開住喺畫面先會響。建議充電時放喺枱面開住。';
+}
+$('soundBtn').onclick = enableSound;
+
+function beep(freq, dur) {
+  if (!ctx) return;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.8, ctx.currentTime + .02);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+  o.connect(g).connect(ctx.destination);
+  o.start(); o.stop(ctx.currentTime + dur + .05);
+}
+function ringPattern() {           // 叮叮噹 x 連續
+  beep(880, .18); setTimeout(() => beep(880, .18), 220); setTimeout(() => beep(1175, .35), 440);
+}
+
+function startRinging(items) {
+  $('alarmList').innerHTML = items.map(i =>
+    `<div class="alarmItem"><span class="badge ${i.type}">${TYPES[i.type]}</span>&nbsp; ${esc(i.name)}</div>`).join('');
+  $('alarm').classList.remove('hidden');
+  $('alarm').dataset.ids = items.map(i => i.id).join(',');
+  stopRinging(false);
+  if (ctx) { ctx.resume(); ringPattern(); ringTimer = setInterval(ringPattern, 1500); }
+  try { navigator.vibrate?.([400, 200, 400]); } catch (e) {}
+  setTimeout(() => stopRinging(false), 120000);      // 最多響 2 分鐘，畫面繼續顯示
+}
+function stopRinging(hide = true) {
+  clearInterval(ringTimer); ringTimer = null;
+  if (hide) $('alarm').classList.add('hidden');
+}
+const alarmIds = () => ($('alarm').dataset.ids || '').split(',').filter(Boolean);
+$('alarmDone').onclick = () => { alarmIds().forEach(id => state.taken[id] = true); save(); stopRinging(); render(); };
+$('alarmSnooze').onclick = () => { alarmIds().forEach(id => snooze[id] = Date.now() + 10 * 60000); stopRinging(); };
+
+function toMs(hm) { const [h, m] = hm.split(':').map(Number); const d = new Date(); d.setHours(h, m, 0, 0); return d.getTime(); }
+function checkAlarms() {
+  resetIfNewDay();
+  if (!$('alarm').classList.contains('hidden')) return;
+  const now = Date.now();
+  const due = state.items.filter(i => {
+    if (state.taken[i.id]) return false;
+    if (snooze[i.id]) return now >= snooze[i.id];
+    if (alarmed[i.id]) return false;
+    const t = toMs(i.time);
+    return now >= t && now - t <= 90 * 60000;     // 到時間、或者過咗唔夠 90 分鐘仲未食
+  });
+  if (due.length) {
+    due.forEach(i => { alarmed[i.id] = true; delete snooze[i.id]; });
+    startRinging(due);
+  }
+}
+
+/* ---------- 匯出日曆 (.ics) ---------- */
+$('icsBtn').onclick = () => {
+  const d = new Date(), ymd = d.toISOString().slice(0, 10).replace(/-/g, '');
+  const stamp = d.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+  const ev = sorted().map(i => {
+    const hm = i.time.replace(':', '') + '00';
+    const [h, m] = i.time.split(':').map(Number);
+    const end = String(h).padStart(2,'0') + String(Math.min(m + 15, 59)).padStart(2,'0') + '00';
+    return [
+      'BEGIN:VEVENT', `UID:${i.id}@medreminder`, `DTSTAMP:${stamp}`,
+      `DTSTART:${ymd}T${hm}`, `DTEND:${ymd}T${end}`, 'RRULE:FREQ=DAILY',
+      `SUMMARY:💊 ${TYPES[i.type]} 食 ${i.name}`,
+      'BEGIN:VALARM', 'TRIGGER:PT0S', 'ACTION:DISPLAY', `DESCRIPTION:${TYPES[i.type]} 食 ${i.name}`, 'END:VALARM',
+      'END:VEVENT'
+    ].join('\r\n');
+  }).join('\r\n');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MedReminder//HK', 'CALSCALE:GREGORIAN', ev, 'END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  a.download = '食藥提示.ics'; document.body.appendChild(a); a.click(); a.remove();
+  alert('已下載。請去「檔案」App 打開「食藥提示.ics」→ 撳「加入全部」。');
+};
+
+/* ---------- 時鐘 & 啟動 ---------- */
+function tick() {
+  const d = new Date();
+  $('clock').textContent = `今日 ${d.getMonth()+1}月${d.getDate()}日　${fmtTime(nowHM())}`;
+}
+setInterval(tick, 1000); tick();
+setInterval(checkAlarms, 10000);
+setInterval(render, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { render(); checkAlarms(); if (ctx) ctx.resume(); } });
+render(); updateSoundUI();
+</script>
+</body>
+</html>
